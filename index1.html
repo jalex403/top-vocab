@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!--<html manifest="top-vocab.manifest">-->
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html;charset=utf-8" />        
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>-->
+        <title>Top 1K Vocab</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="themes/jac-theme1.min.css" />
+        <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+        <link rel="stylesheet" href="jquery.mobile.structure-1.4.2.min.css" /> 
+        <script src="jquery-1.8.2.min.js"></script>
+        <script src="jquery.mobile-1.4.2.min.js"></script>
+        <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>-->
+        <script type="text/javascript">
+            document.write('<link rel="apple-touch-startup-image" href="images/startup'+(navigator.platform=='iPad'?'_ipad':'')+'.jpg">');
+          </script>
+        <link rel="apple-touch-icon" href="images/icon.png"/>
+
+
+        <script>
+            $(document).bind("mobileinit", function(){
+              $.extend(  $.mobile , {
+                activeBtnClass: ui-btn-hover,
+                loadingMessage: "loading - cargando",
+                loadingMessageTextVisible: true
+                
+              });
+            });
+            
+            // Bypass Access-Control-Allow-Origin
+//            $.support.cors = true;
+//            $.mobile.allowCrossDomainPages = true;
+            var speakUrl = "/blank.mp3";
+            var speakLinkReady = false;
+            
+            function ajaxTranslateCallback(response) {
+              speakUrl = response;
+              speakLinkReady = true;
+            }
+
+        $(document).ready(function() {
+            
+
+           
+            var ajaxFlag = false;
+            $('#loadingImg').hide();
+//            var language = "en-us";
+            var elementsArray;
+            var flashcardIndexArray = new Array();
+            var playFlag = false;
+            var playingDone  = true;   
+//            online = window.navigator.onLine;
+              
+            var flagChecker = setInterval(serviceFlags, 100);
+            
+            function serviceFlags(){
+                if( typeof serviceFlags.online == 'undefined' ) {
+                    serviceFlags.online = navigator.onLine;
+                }
+                if( typeof serviceFlags.showLoading == 'undefined' ) {
+                    serviceFlags.showLoading = false;
+                }
+                if( typeof serviceFlags.onlineCtr == 'undefined' ) {
+                    serviceFlags.onlineCtr = 0;
+                }
+
+                
+                if (speakLinkReady){
+                   $('#audio').prop("src", speakUrl);                
+                   $("#audio").trigger('load');
+                   $("#audio").trigger('play');
+                   speakLinkReady = false;
+                   playFlag = false;
+                   playingDone = false;
+                };
+                
+                if (((ajaxFlag == true) || (playFlag == true) || !playingDone ) && !serviceFlags.showLoading){
+                    serviceFlags.showLoading = true;
+                    $('#loadingImg').show()
+                }
+                
+                if ((ajaxFlag == false) && (playFlag == false) && playingDone && serviceFlags.showLoading){
+                    serviceFlags.showLoading = false;
+                    $('#loadingImg').hide()
+                }        
+                
+              ++serviceFlags.onlineCtr;
+              if(serviceFlags.onlineCtr > 9){
+                  serviceFlags.onlineCtr = 0;
+                  serviceFlags.online = navigator.onLine;
+              }
+                
+              if (serviceFlags.online != navigator.onLine){
+                    serviceFlags.online = navigator.onLine;
+                    if (serviceFlags.online) {
+                          $(".needConnection").prop("disabled", false);
+                          $("#conStatus").html(" ");
+                          $("#wordGrid .grid-link").addClass('e-word');
+                          $("#wordGrid .grid-link").css('color',"#2980B9");
+                        } else {
+                          $(".needConnection").prop("disabled", true);
+                          $("#conStatus").html("Offline! - Sin Conexion!");
+                          $("#wordGrid .grid-link").removeClass('e-word');
+                          $("#wordGrid .grid-link").css('color','');
+                        }
+                }    
+
+            }
+            
+
+            function getToken() {
+                if( typeof getToken.tokenExpires == 'undefined' ) {
+                    getToken.tokenExpires = 0;
+                }
+                if( typeof getToken.g_token == 'undefined' ) {
+                    getToken.g_token = '';
+                }
+              var currentTime = new Date();
+                
+              if ((currentTime.getTime()/1000) > getToken.tokenExpires){  
+                  var requestStr = "./token.php";               
+                  $.ajax({
+                    url: requestStr,
+                    type: "GET",
+                    cache: true,
+                    dataType: 'json',
+                    success: function (data) {
+                        g_token = data.access_token;
+                        getToken.tokenExpires = Number((currentTime.getTime()/1000 + 570));
+                    }             
+                  });
+              }
+              return g_token;
+            }
+            
+
+              function getSpeakUrl(word) {
+              var p = new Object;
+              p.text = word;
+              p.format = "audio/mp3";
+              p.language = "en";
+              p.options = "MinSize";
+              p.appId = "Bearer " + getToken();
+
+              var requestStr = "http://api.microsofttranslator.com/V2/Ajax.svc/Speak";
+
+              $.ajax({
+                url: requestStr,
+                type: "GET",
+                data: p,
+                dataType: 'jsonp',           
+                jsonp: 'oncomplete',
+                jsonpCallback:'ajaxTranslateCallback',
+                cache: true,
+                async: false
+              });
+            }         
+                    
+               
+            
+
+
+            $.ajaxSetup({   
+                beforeSend: function() {
+//                     $('#loadingImg').show();
+                     ajaxFlag = true;
+                  },
+                  complete: function(){
+//                     $('#loadingImg').hide();
+                     ajaxFlag = false;
+                  },
+                  error: function(jqXHR, textStatus, errorThrown){ 
+                      $('#loadingImg').hide();
+//                      alert("Error, try again/intente otra vez");
+                      alert("An error occured: " + textStatus + " " + errorThrown);
+                  },
+                async: false
+                });
+        
+            $("#btnPlay").on("click", function(){
+                 
+                var word = $("#word").val();
+//                language = "en-us";
+                //check for null
+                if (!word){
+//                   language = "es-mx"; 
+                   word = "enter word";
+                };
+                speakWord(word);
+             });
+             
+            
+             
+            $("#btnWords").click(function(){
+                 fillWordGrid();
+                $.mobile.changePage($("#word_list"), "none");
+            });
+            
+
+            
+            function firstPlay(){
+                if( typeof firstPlay.initPlay == 'undefined' ) {
+                    firstPlay.initPlay = false;
+                }
+                if (!firstPlay.initPlay) {
+                    $("#audio").trigger('load');
+                    $("#audio").trigger('play');
+                    $("#audio").trigger('pause');
+                }
+            }
+        
+            function speakWord(word){
+                if( typeof speakWord.xmlIsLoaded == 'undefined' ) {
+                    speakWord.currentWord = "test";
+                }
+                var fullLink;
+                var string;
+                var word1;
+                firstPlay();
+                playFlag = true;
+
+               if (speakWord.currentWord == word){
+                    $("#audio").trigger('load');
+                    $("#audio").trigger('play');
+                    playFlag = false;
+                    playingDone = false;
+                    return;
+               }
+               speakWord.currentWord = word; 
+               if ($('#voiceEngine').val() == "bing"){
+                   getSpeakUrl(speakWord.currentWord);               
+                   fullLink = speakUrl;
+                   return;
+               }else if ($('#voiceEngine').val() == "voicerss"){
+                   fullLink = "http://api.voicerss.org/?&key=ab912f6a48934df8a324ffdee99c70db&hl=en-us&src=" + encodeURI(speakWord.currentWord);
+               }else {
+//               means ($('#voiceEngine').val() == "tts-api"){
+                    string = speakWord.currentWord.split(" ",1);
+                    word1 = (string[0]);
+                    fullLink = "http://tts-api.com/tts.mp3?q=" + encodeURI(word1);
+               }
+                    $('#audio').prop("src", fullLink);
+                    $("#audio").trigger('load');
+                    $("#audio").trigger('play');
+                    playFlag = false;
+                    playingDone = false;               
+            };
+            
+        $("#wordGrid").on("click",".e-word",function(){
+//            language = "en-us";
+            speakWord($(this).text());
+          });
+
+        $("#audio").on("ended",function(){
+          playingDone = true;
+        });
+
+        function loadXMLDoc (){ 
+            if( typeof loadXMLDoc.xmlIsLoaded == 'undefined' ) {
+                    loadXMLDoc.xmlIsLoaded = false;
+            }   
+            
+            if (loadXMLDoc.xmlIsLoaded){
+                return;
+            }
+            $.ajax({
+                    type: "GET",
+                    async: false,
+                    url: "TopEnglishVocab.xml",
+                    dataType: "text",
+                    success: function(data) {xml=data;}
+            });
+           var parser = new DOMParser();
+           var xmlDoc = parser.parseFromString(xml , "text/xml");
+
+           elementsArray = xmlDoc.documentElement.getElementsByTagName('word');
+
+           
+        }
+        
+        window.fillWordGrid = function(){
+           loadXMLDoc();
+
+           var startPointer = $('#rankGroup').val()-200;
+           var arrayLength = $('#rankGroup').val();
+           var output="<div class='ui-block-a ui-bar-a' ><span>Rango: Spanish</span></div><div class='ui-block-b ui-bar-a' ><span >Ingles</span></div>";
+  
+           for(var i=startPointer; i < arrayLength; i++){
+                var rank = elementsArray[i].getElementsByTagName('rank')[0].firstChild.nodeValue;
+                var spanish = elementsArray[i].getElementsByTagName('spanish')[0].firstChild.nodeValue;
+                var english = elementsArray[i].getElementsByTagName('english')[0].firstChild.nodeValue;
+                
+                output += "<div class='ui-block-a' style='border:1px solid lightgray;'><span>"+ rank +":<br>  "+ spanish +"</span></div>";
+                
+                if (navigator.onLine) {
+                    output += "<div class='ui-block-b e-word grid-link'  style='border:1px solid lightgray; color:#2980B9;'><span><br>"+ english +"</span></div>" ;
+                } else {
+                   output += "<div class='ui-block-b ui-link'  style='border:1px solid lightgray;'><span><br>"+ english +"</span></div>" ;
+               }
+
+           }
+            $( "#wordGrid" ).html( output );
+        }
+        
+                
+        $("#btnFcards").click(function(){
+            loadFlashcards();            
+         });
+         
+        window.loadFlashcards = function(){
+            loadXMLDoc(); 
+            fillFlashcardIndexArray();
+            switchFlashcard("next");
+            $("body").pagecontainer("change", "#englishflashcard");
+            
+         };
+         
+         function switchFlashcard(direction){
+             if( typeof switchFlashcard.flashcardIndex == 'undefined' ) {
+                    switchFlashcard.flashcardIndex = 0;
+            }
+            if( typeof switchFlashcard.shiftedIndex == 'undefined' ) {
+                    switchFlashcard.shiftedIndex = 0;
+            }
+             
+             
+             if (direction === "next"){
+                 if (switchFlashcard.flashcardIndex === 199){
+                     switchFlashcard.flashcardIndex = 0;
+                 }else{
+                     switchFlashcard.flashcardIndex += 1;
+                 }                     
+             }
+             if (direction === "previous"){
+                 if (switchFlashcard.flashcardIndex === 0){
+                     switchFlashcard.flashcardIndex = 199;
+                 }else{
+                     switchFlashcard.flashcardIndex -=1;
+                 }                     
+             }
+             
+             switchFlashcard.shiftedIndex = flashcardIndexArray[switchFlashcard.flashcardIndex]  + Number($('#rankGroup').val()) - 200;
+             var spanish = elementsArray[switchFlashcard.shiftedIndex].getElementsByTagName('spanish')[0].firstChild.nodeValue;
+             var english = elementsArray[switchFlashcard.shiftedIndex].getElementsByTagName('english')[0].firstChild.nodeValue;
+             $( "#englishWord" ).html( english );
+             $( "#spanishWord" ).html( spanish );
+         }
+         
+        $("#btnPlayEng").on("click", function(){               
+//                language = "en-us";
+                var word = $( "#englishWord" ).html();
+                //Play Audio                
+                speakWord(word);
+                
+         });
+         
+        $(document).on("pageshow","#englishflashcard",function(){
+          $( "#englishWord" ).css('visibility','visible');
+          $( "#spanishWord" ).css('visibility','visible');
+        });
+        $(document).on("pageshow","#spanishflashcard",function(){
+          $( "#englishWord" ).css('visibility','visible');
+          $( "#spanishWord" ).css('visibility','visible');
+        });
+     
+        
+        $("#btnPrev").on("click", function(){
+            $( "#englishWord" ).css('visibility','hidden');
+            $( "#spanishWord" ).css('visibility','hidden');
+            $("body").pagecontainer("change", "#englishflashcard",{ transition:"slidedown", changeHash:"false"});
+            switchFlashcard("previous");
+             
+        });
+        
+        $("#btnNext").on("click", function(){
+//            switchFlashcard("next");
+            $( "#englishWord" ).css('visibility','hidden');
+            $( "#spanishWord" ).css('visibility','hidden');
+            $("body").pagecontainer("change", "#englishflashcard",{ transition:"slideup", changeHash:"false"});
+            switchFlashcard("next");
+        });
+        
+        $("#btnEPrev").on("click", function(){   
+            $( "#englishWord" ).css('visibility','hidden');
+            $( "#spanishWord" ).css('visibility','hidden');
+            $("body").pagecontainer("change", "#englishflashcard",{ transition:"slidedown", allowSamePageTransition:"true"});
+            switchFlashcard("previous");
+        });
+        
+        $("#btnENext").on("click", function(){
+            $( "#englishWord" ).css('visibility','hidden');
+            $( "#spanishWord" ).css('visibility','hidden');
+            $("body").pagecontainer("change", "#englishflashcard",{ transition:"slideup", allowSamePageTransition:"true" });
+            switchFlashcard("next");
+        });
+        
+        $(".btnFlip").on("click", function(){
+            var activePage =$("body").pagecontainer("getActivePage").prop( 'id' );
+            if(activePage === "englishflashcard"){
+                $("body").pagecontainer("change", "#spanishflashcard",{ transition:"flip", changeHash:"false"});
+            } 
+            if(activePage === "spanishflashcard"){
+                $("body").pagecontainer("change", "#englishflashcard",{ transition:"flip", changeHash:"false"});
+            } 
+        });
+        
+        function fillFlashcardIndexArray(){
+            if( typeof fillFlashcardIndexArray.arrayIsLoaded == 'undefined' ) {
+                    fillFlashcardIndexArray.arrayIsLoaded = false;
+            }
+            if (fillFlashcardIndexArray.arrayIsLoaded){
+                return;
+            }
+            for (var i = 0; i < 200; i++){
+                flashcardIndexArray[i] = i + 1;
+            }
+            shuffleArray(flashcardIndexArray);
+        }
+   
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+            return array;
+        }    
+ 
+         $('.activeHighlight').on('vmousedown', function() {
+            $(this).addClass('ui-btn-active');
+        });
+
+        $('.activeHighlight').on('vmouseup', function() {
+            $(this).removeClass('ui-btn-active');
+        });  
+
+         $('#wordGrid').on('vmousedown',".e-word", function() {
+            $(this).css("background-color", "#E74C3C");
+        });
+
+        $('#wordGrid').on('vmouseup',".e-word", function() {
+            $(this).css("background-color", '');
+        });  
+        
+        
+        
+        
+});                        
+            
+	</script>
+
+    </head>
+    <body>
+        <div id="homepage" style="height:100%;" data-role="page" >
+
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+		<h1>Top 1K Vocab</h1>                
+	</div><!-- /header -->
+       <div style="height:100%;" class="ui-content" data-role="main">	
+
+	<audio id="audio" ><source src="/blank.mp3" type="audio/mpeg"/></audio>
+ 
+        
+            <div class="ui-field-contain">
+                <fieldset data-role="controlgroup" data-mini="true">
+                  <legend>Selecione Grupo de Palabras:</legend>
+                    <label for="day">Selecione Grupo de Palabras:</label>
+                    <select name="rankSelect" id="rankGroup" data-native-menu="false">
+                      <option value="200">Rango 1-200</option>
+                      <option value="400">Rango 201-400</option>
+                      <option value="600">Rango 401-600</option>
+                      <option value="800">Rango 601-800</option>
+                      <option value="1000">Rango 801-1000</option>
+
+                    </select>
+                </fieldset>
+             
+                <fieldset class="ui-grid-a" style="padding-top: 10px">
+                    <div class="ui-block-a"><button  id="btnWords" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-bullets ui-btn-icon-left">Ver Lista</button></div>
+                    <div class="ui-block-b"><button  id="btnFcards" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-action ui-btn-icon-left">Flashcards</button></div>
+                </fieldset>
+            </div>
+
+            <div>
+                <div><input class="needConnection" type="text" id="word" placeholder="Entre palabra en ingles.." data-mini="true"></div>
+                <!--<div><input id="btnPlay" type="button" value="Pronounce Word" data-mini="true" data-icon="audio"></div>-->
+                <div><button id="btnPlay" class="needConnection activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-audio ui-btn-icon-left">Pronunciar</button></div>
+                <div id="conStatus"></div>
+            </div>
+        
+        </div><!-- /content -->
+        <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+            <div data-role="navbar" data-iconpos="bottom" >
+                <ul >
+                    <li><a href="#" data-icon="home">Home</a></li>
+                <li><a href="#about_page" data-icon="info">About</a></li>
+                </ul>
+            </div>
+        </div>
+</div><!-- /page -->
+
+<div id="about_page" data-role="page">
+
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Top English Vob</h1>                
+    </div>
+
+    <div class="ui-content" data-role="main">
+        <div class="ui-field-contain">
+                    <fieldset data-role="controlgroup" data-mini="true">
+                      <legend>Selecione Motor de Pronuciacion</legend>
+                        <label for="day">Selecione Motor de Pronuciacion</label>
+                        <select name="voiceEngine" id="voiceEngine" data-native-menu="false">
+                          <option value="bing">Bing Translate</option>
+                          <option value="voicerss">VoiceRss.org</option>
+                          <option value="tts-api">tts-api.com</option>
+                          <!--<option value="google">Google Transate</option>-->
+
+                        </select>
+                    </fieldset>
+            <div> <br>  Este app es para ayudar aprender las 1000 palabras mas comunes en  ingles.<br><br>
+                    1. Selectione grupo de palabras. Cada grupo es de 200 palabras. La de rango 1 es la mas comun.<br><br>
+                    2. "Ver Lista" le mostrara la lista de palabras en ingles y espanol. Haga click en la palabra para la pronunciacion.<br><br>
+                    3. "Flashcard" le mostrara las palabras en forma de targetas didacticas. <br><br>
+                    *"Prox" para avansar a lo proxima palabra<br>
+                    *"Prev" para ver la palabra previa<br>
+                    *"Pron.." para oir la pronunciacion<br>
+                    *"Voltear" para cambiar entre ingles y espanol<br><br>
+                    4. En la pagina principal puede entrar palabras en ingles y oir la pronunciacion.
+        
+            </div>
+    </div>
+    </div>
+    
+    <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+        <div data-role="navbar" data-iconpos="bottom">
+            <ul>
+                <li><a href="#homepage" data-icon="home">Home</a></li>
+                <li><a href="#" data-icon="info">About</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="word_list" data-role="page" >
+
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Word List</h1> 
+        <a href="#" data-icon="back" data-iconpos="notext" data-rel="back"></a>
+        <a href="#homepage" data-icon="home" data-iconpos="notext" ></a>
+         
+    </div>
+    <div  class="ui-content" data-role="main">
+       
+            <div id="wordGrid" class="ui-grid-a ui-body-a ui-corner-all" style="padding:5px; font-size: 1em;">
+              <div class='ui-block-a ui-bar-a' ><span>Go To</span></div>
+              <div class='ui-block-b ui-bar-a' ><span><a href="javascript:fillWordGrid()">Recargar Lista</a></span></div>
+              </div>
+    </div>
+    
+    <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+        <div data-role="navbar" data-iconpos="bottom">
+            <ul>
+                <li><a href="#homepage" data-icon="home">Home</a></li>
+                <li><a href="#about_page" data-icon="info">About</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="spanishflashcard" data-role="page" >
+
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Flashcards</h1>  
+        <a href="#" data-icon="back" data-iconpos="notext" data-rel="back"></a>
+        <a href="#homepage" data-icon="home" data-iconpos="notext" ></a>
+    </div>
+
+    <div class="ui-content" data-role="main">
+        
+        <ul id="spanishSide" style="margin:10px;" class="ui-listview ui-corner-all" data-role="listview">
+            <!--<li class="ui-li-divider ui-bar-a ui-first-child" data-form="ui-bar-a" data-swatch="a" data-theme="a" data-role="list-divider" role="heading"></li>-->
+            <li style="text-align: center;" class="ui-li-divider ui-header ui-bar-a" data-role="list-divider" >Espanol</li>
+            <li></li>
+            <li><p style="overflow:auto; text-align: center; font-size: 2em;" id="spanishWord"><a href="javascript:loadFlashcards()">Recargar</a></span></p></li>
+            <li></li>
+        </ul>
+        <p></p>
+        <!--<input class="btnFlip" type="button" data-mini="true" data-icon="action" value="Voltear Carta" data-iconpos="bottom">-->
+        <button class="btnFlip activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-action ui-btn-icon-bottom">Voltear Carta</button>
+    </div>
+    
+    <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+        <div data-role="navbar" data-iconpos="bottom">
+            <ul>
+<!--                <li> <input id="btnPrev" type="button" value="Prev" data-mini="true" data-icon="arrow-l" data-iconpos="bottom"></li>
+                <li> <input id="btnPlayEng" type="button" value="Play" data-mini="true" data-icon="audio" data-iconpos="bottom"></li>
+                <li> <input id="btnNext" type="button" value="Prox" data-mini="true" data-icon="arrow-r" data-iconpos="bottom"></li>-->
+                <li> <button id="btnPrev" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-arrow-l ui-btn-icon-bottom">Prev</button></li>
+                <!--<li> <input id="btnPlayEng" type="button" value="Play" data-mini="true" data-icon="audio" data-iconpos="bottom"></li>-->
+                <li><button id="btnNext" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-arrow-r ui-btn-icon-bottom">Prox</button></li>
+               
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="englishflashcard" data-role="page" >
+
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Flashcards</h1>  
+        <a href="#" data-icon="back" data-iconpos="notext" data-rel="back"></a>
+        <a href="#homepage" data-icon="home" data-iconpos="notext" ></a>
+    </div>
+
+    <div class="ui-content" data-role="main">
+        
+        <ul id="englishSide" style="margin:10px;" class="ui-listview ui-corner-all" data-role="listview">
+           <li style="text-align: center;" class="ui-li-divider ui-header ui-bar-a" data-role="list-divider" >Ingles</li>
+            <li></li>
+            <li><p style="overflow:auto; text-align: center; font-size: 2em;" id="englishWord"><a href="javascript:loadFlashcards()">Recargar</a></p></li>
+            <li></li>
+        </ul>
+        <p></p>
+        <!--<input class="btnFlip" type="button" data-mini="true" data-icon="action" value="Voltear Carta" data-iconpos="bottom">-->
+        <button class="btnFlip activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-action ui-btn-icon-bottom">Voltear Carta</button>
+    </div>
+    
+    <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+        <div data-role="navbar" data-iconpos="bottom">
+            <ul>
+                <li><button id="btnEPrev" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-arrow-l ui-btn-icon-bottom">Prev</button></li>
+                <li ><button id="btnPlayEng" class="needConnection activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-audio ui-btn-icon-bottom">Pronu..</button></li>
+                <li><button id="btnENext" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-arrow-r ui-btn-icon-bottom">Prox</button></li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="loadingImg" style="text-align:center; position:fixed; width: 100%; top: 25%; background: transparent"><img src="images/ajax-loader.gif" width="32" height="32" alt="Loading.."/></div>
+</body>
+</html>
+

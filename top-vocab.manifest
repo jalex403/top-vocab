@@ -1,0 +1,25 @@
+CACHE MANIFEST
+ 
+# Version: 1.21
+
+NETWORK:
+*
+
+CACHE:
+index.html
+top1kVocab.js
+themes/jac-theme1.min.css
+themes/jquery.mobile.icons.min.css
+jquery.mobile.structure-1.4.2.min.css 
+jquery-1.8.2.min.js
+jquery.mobile-1.4.2.min.js
+TopEnglishVocab.xml
+themes/images/ajax-loader.gif
+images/ajax-loader.gif
+images/icon.png
+images/startup.jpg
+images/startup_ipad.jpg
+images/icons-png/action-black.png
+images/figure.png
+images/icons-png/bars-black.png
+

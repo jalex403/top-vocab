@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html manifest="top-vocab.manifest">
+<!--<html>-->
+    <head>
+        <meta name="description" content="Aplicacion web o webapp para aprender las palabras mas comunes en ingles.">
+        <meta name="keywords" content="Webapp, Learn English, aprende ingles, app most common english words, palabras ingles mas comunes">
+        <meta name="author" content="Jorge A Campos">
+        <meta http-equiv="content-type" content="text/html;charset=utf-8" />        
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes">
+        <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>-->
+        <title>Top 1K Vocab</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <link rel="stylesheet" href="themes/jac-theme1.min.css" />
+        <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+        <link rel="stylesheet" href="jquery.mobile.structure-1.4.2.min.css" /> 
+        <script src="jquery-1.8.2.min.js"></script>
+        <script src="jquery.mobile-1.4.2.min.js"></script>
+        <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>-->
+        <script >
+            document.write('<link rel="apple-touch-startup-image" href="images/startup'+(navigator.platform=='iPad'?'_ipad':'')+'.jpg">');
+          </script>
+        <script src="top1kVocab.js"> </script>
+        <link rel="apple-touch-icon" href="images/icon.png"/>
+        <link rel="icon" sizes="196x196" href="images/a-icon.png">
+
+
+    </head>
+    <body>
+        <div id="homepage" style="height:100%;" data-role="page" >
+
+	<div data-role="header" data-position="fixed" data-tap-toggle="false">
+		<h1>Top 1K Vocab</h1>                
+	</div><!-- /header -->
+       <div style="height:100%;" class="ui-content" data-role="main">	
+
+	<audio id="audio" ><source src="blank.mp3" type="audio/mp3"/></audio>
+        <div style="text-align:center; height: 6em;"><img src="images/figure.png" alt="Smiley face" style="height: 6em;"></div>
+        <!--<div style="text-align:center; width: 100%;"><img src="images/figure.png" alt="Smiley face" width="100" height="100"></div>-->
+        
+            <div class="ui-field-contain" style="padding: 0px">
+                <fieldset data-role="controlgroup" data-mini="true">
+                  <legend>Seleccione Grupo de Palabras:</legend>
+                    <label for="rankSelect">Seleccione Grupo de Palabras:</label>
+                    <select name="rankSelect" id="rankGroup" data-native-menu="false">
+                      <option value="200">Rango 1-200</option>
+                      <option value="400">Rango 201-400</option>
+                      <option value="600">Rango 401-600</option>
+                      <option value="800">Rango 601-800</option>
+                      <option value="1000">Rango 801-1000</option>
+                      <option value="1200">Todas 1-1000</option>
+
+                    </select>
+                </fieldset>
+             
+                <fieldset class="ui-grid-a" style="padding-top: 5px">
+                    <div class="ui-block-a"><button  id="btnFcards" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-action ui-btn-icon-left">Flashcards</button></div>
+                    <div class="ui-block-b"><button  id="btnWords" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-bullets ui-btn-icon-left">Ver Lista</button></div>
+                    </fieldset>
+            </div>
+
+            <div>
+                <div><input class="needConnection" type="text" id="word" placeholder="Entre palabra en ingles.." data-mini="true"></div>
+                <div><button id="btnPlay" class="needConnection activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-audio ui-btn-icon-left">Pronunciar</button></div>
+                <div id="conStatus"></div>
+            </div>
+        
+        </div><!-- /content -->
+        <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+            <div data-role="navbar" data-iconpos="bottom" >
+                <ul >
+                    <li><a href="#" data-icon="home">Inicio</a></li>
+                <li><a href="#about_page" data-icon="info">Info</a></li>
+                </ul>
+            </div>
+        </div>
+</div><!-- /page -->
+
+<div id="about_page" data-role="page">
+
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Top English Vob</h1>                
+    </div>
+
+    <div class="ui-content" data-role="main">
+       <div style="text-align:center; height: 6em;"><img src="images/figure.png" alt="Smiley face" style="height: 6em;"></div>
+        <div class="ui-field-contain">
+            <div data-role="collapsibleset">
+                <div data-role="collapsible">
+                    <h3>Installar App</h3>
+                    <div> 
+                         <h3>Iphone</h3>
+                         <ol>
+                             <li>Acceda a la pagina de <a href="#homepage">Inicio</a></li>
+                             <li>Selecciona  <img src="images/icons-png/action-black.png"/>.</li>
+                             <li>Selecciona 'Añadir a Inicio'</li>
+                             <li>Selecciona 'Añadir' </li>
+                         </ol>
+                         
+                         <h3>Android</h3>
+                        <ol>
+                             <li>Acceda a la pagina de <a href="#homepage">Inicio</a></li>
+                             <li>Selecciona  <img src="images/icons-png/bars-black.png"/>.</li>
+                             <li>Selecciona  'Añadir acceso directo' o 'Crear acceso directo' </li>
+                             <li>Selecciona 'Añadir' o 'Crear </li>
+                         </ol>
+                    </div> 
+                    </div>
+                <div data-role="collapsible">
+                    <h3>Motor de Pronuciacion</h3>
+                    <div data-role="collapsibleset">
+                        <fieldset data-role="controlgroup" data-mini="true">
+                          <legend>Selecione Motor de Pronuciacion</legend>
+                            <label for="voiceEngine">Selecione Motor de Pronuciacion</label>
+                            <select name="voiceEngine" id="voiceEngine" data-native-menu="false">
+                              <option value="bing">Bing Translate</option>
+                              <option value="voicerss">VoiceRss.org</option>
+                              <option value="tts-api">tts-api.com</option>
+                            </select>
+                        </fieldset>
+                        <p>"Bing Translate" tiene la mejor pronuncicion pero es el mas lento en cargar. "Voicerss" tiene un limite de uso mas bajo. "tti-api" solo pronuncia una palabra a la vez.</p>
+                    </div> 
+                    </div> 
+                 <div data-role="collapsible" >
+                    <h3>Sobre el App</h3> 
+                     Este app es para ayudar estudiar y aprender las 1000 palabras mas comunes en  ingles.
+                    <ol>
+                        <li>Selectione grupo de palabras. Cada grupo es de 200 palabras. La de rango 1 es la mas comun.</li>
+                        <li>"Ver Lista" le mostrara la lista de palabras en ingles y espanol. Haga click en la palabra para la pronunciacion.</li>
+                        <li>"Flashcard" le mostrara las palabras en forma de targetas didacticas.
+                           <ul>
+                                <li>"Prox" para avansar a lo proxima palabra</li>
+                                <li>"Prev" para ver la palabra previa</li>
+                                <li>"Pron.." para oir la pronunciacion</li>
+                                <li>"Voltear" para cambiar entre ingles y espanol</li>
+                           </ul>
+                        </li>
+                        <li>En la pagina principal puede entrar palabras en ingles y oir la pronunciacion.</li>
+                        <li>Preguntas o problemas, manda un <a href="mailto:me@jorgeacampos.com?Subject=Top-Vocab%20app%20issue" target="_top">
+email aqui.</a> Good Luck!</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+        <div data-role="navbar" data-iconpos="bottom">
+            <ul>
+                <li><a href="#homepage" data-icon="home">Inicio</a></li>
+                <li><a href="#" data-icon="info">Info</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="word_list" data-role="page" >
+
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Word List</h1> 
+        <a href="#" data-icon="back" data-iconpos="notext" data-rel="back"></a>
+        <a href="#homepage" data-icon="home" data-iconpos="notext" ></a>
+         
+    </div>
+    <div  class="ui-content" data-role="main">
+
+ <table id="wordGrid" data-role="table" data-mode="columntoggle"  class="ui-responsive ui-body-a ui-corner-all" style="font-size: 1em; table-layout: fixed;" data-filter="true" data-filter-placeholder="Buscar" data-column-btn-text="" >
+              <thead >
+                  <tr>
+                      <th style="width:18%">Rgo.</th>
+                      <th >Español</th>
+                      <th>Ingles</th>
+                  </tr>
+              </thead>
+              <tbody >
+                  <tr>
+                      <td ></td>
+                      <td >Recargar</td>
+                      <td ><a href="javascript:fillWordGrid()">Lista</a></td>
+                  </tr>                  
+              </tbody>
+           </table>
+    </div>
+    
+    <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+        <div data-role="navbar" data-iconpos="bottom">
+            <ul>
+                <li><a href="#homepage" data-icon="home">Inicio</a></li>
+                <li><a href="#about_page" data-icon="info">Info</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="spanishflashcard" data-role="page" >
+
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Flashcards</h1>  
+        <a href="#" data-icon="back" data-iconpos="notext" data-rel="back"></a>
+        <a href="#homepage" data-icon="home" data-iconpos="notext" ></a>
+    </div>
+
+    <div class="ui-content" data-role="main">
+        <div style="text-align:center; height: 4em;"><img src="images/figure.png" alt="Smiley face" style="height: 4em;"></div>
+        <ul id="spanishSide" style="margin:2px;" class="ui-listview ui-corner-all" data-role="listview">
+           <li style="text-align: center;" class="ui-li-divider ui-header ui-bar-a" data-role="list-divider" >Espanol</li>
+            <li></li>
+            <li><p style="overflow:auto; text-align: center; font-size: 2em;" id="spanishWord"><a href="javascript:loadFlashcards()">Recargar</a></p></li>
+            <li></li>
+        </ul>
+        <p></p>
+        <button class="btnFlip activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-action ui-btn-icon-bottom">Voltear Carta</button>
+    </div>
+    
+    <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+        <div data-role="navbar" data-iconpos="bottom">
+            <ul>
+                <li> <button id="btnPrev" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-arrow-l ui-btn-icon-bottom">Prev</button></li>
+                <li><button id="btnNext" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-arrow-r ui-btn-icon-bottom">Prox</button></li>
+               
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="englishflashcard" data-role="page" >
+
+    <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <h1>Flashcards</h1>  
+        <a href="#" data-icon="back" data-iconpos="notext" data-rel="back"></a>
+        <a href="#homepage" data-icon="home" data-iconpos="notext" ></a>
+    </div>
+
+    <div class="ui-content" data-role="main">
+        <div style="text-align:center; height: 4em;"><img src="images/figure.png" alt="Smiley face" style="height: 4em;"></div>
+        <ul id="englishSide" style="margin:2px;" class="ui-listview ui-corner-all" data-role="listview">
+           <li style="text-align: center;" class="ui-li-divider ui-header ui-bar-a" data-role="list-divider" >Ingles</li>
+            <li></li>
+            <li><p style="overflow:auto; text-align: center; font-size: 2em;" id="englishWord"><a href="javascript:loadFlashcards()">Recargar</a></p></li>
+            <li></li>
+        </ul>
+        <p></p>
+         <button class="btnFlip activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-action ui-btn-icon-bottom">Voltear Carta</button>
+    </div>
+    
+    <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+        <div data-role="navbar" data-iconpos="bottom">
+            <ul>
+                <li><button id="btnEPrev" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-arrow-l ui-btn-icon-bottom">Prev</button></li>
+                <li ><button id="btnPlayEng" class="needConnection activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-audio ui-btn-icon-bottom">Pronu..</button></li>
+                <li><button id="btnENext" class="activeHighlight ui-btn ui-btn-corner-all ui-mini ui-icon-arrow-r ui-btn-icon-bottom">Prox</button></li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="loadingImg" style="text-align:center; position:fixed; width: 100%; top: 25%; background: transparent"><img src="images/ajax-loader.gif" width="32" height="32" alt="Loading.."/></div>
+</body>
+</html>
